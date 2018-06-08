@@ -120,7 +120,7 @@ example sign message:
 #### Event `'server'`
 `function (message) {}`
 
-Emitted when the client recieves a server message
+Emitted when the client receives a server message
 
 example server message:
 ```javascript
