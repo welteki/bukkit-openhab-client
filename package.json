@@ -1,0 +1,35 @@
+{
+  "name": "bukkit-openhab-client",
+  "version": "0.1.0",
+  "description": "Client for the Minecraft bukkit-openhab-plugin",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prepublish": "npm run clean && npmr run build",
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "minecraft",
+    "spigot",
+    "openhab"
+  ],
+  "author": "Han Verstraete",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/welteki/bukkit-openhab-client"
+  },
+  "bugs": {
+    "url": "https://github.com/welteki/bukkit-openhab-client/issues"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@types/ws": "^5.1.1",
+    "ws": "^5.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^2.9.1"
+  }
+}
