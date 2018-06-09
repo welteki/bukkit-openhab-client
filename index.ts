@@ -66,7 +66,6 @@ export class Client extends EventEmitter {
     //@ts-ignore
     wsURL.port = wsURL.port ? wsURL.port : this.options.port.toString()
     this.url = wsURL;
-    console.log(wsURL.href);
 
     this.connect();
   }
