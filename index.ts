@@ -2,7 +2,7 @@ import * as Websocket from 'ws';
 import { EventEmitter } from 'events';
 import { URL } from 'url';
 
-enum message {
+enum MessageType {
   PLAYER_MESSAGE            = 1,
   SERVER_MESSAGE            = 2,
   PLAYER_COMMANDS_MESSAGE   = 3,
@@ -118,13 +118,13 @@ export class Client extends EventEmitter {
 
   private onMessage(data: any): void {
     switch (data.messageType) {
-      case message.PLAYER_MESSAGE:
+      case MessageType.PLAYER_MESSAGE:
         this.onPlayerMessage(data.message);
         break;
-      case message.SERVER_MESSAGE:
+      case MessageType.SERVER_MESSAGE:
         this.onServerMessage(data.message);
         break;
-      case message.SIGN_MESSAGE:
+      case MessageType.SIGN_MESSAGE:
         this.onSignMessage(data.message);
         break;
       default:
