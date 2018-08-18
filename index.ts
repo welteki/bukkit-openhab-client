@@ -3,11 +3,11 @@ import { EventEmitter } from 'events';
 import { URL } from 'url';
 
 enum MessageType {
-  PLAYER_MESSAGE            = 1,
-  SERVER_MESSAGE            = 2,
-  PLAYER_COMMANDS_MESSAGE   = 3,
-  SIGN_MESSAGE              = 4,
-  SIGN_COMMANDS_MESSAGE     = 5
+  PLAYER_MESSAGE = 1,
+  SERVER_MESSAGE = 2,
+  PLAYER_COMMANDS_MESSAGE = 3,
+  SIGN_MESSAGE = 4,
+  SIGN_COMMANDS_MESSAGE = 5
 }
 
 enum websocketState {
@@ -18,18 +18,18 @@ enum websocketState {
 }
 
 enum websocketCloseStatus {
-  WEB_SOCKET_SUCCESS_CLOSE_STATUS                 = 1000,
-  WEB_SOCKET_ENDPOINT_UNAVAILABLE_CLOSE_STATUS    = 1001,
-  WEB_SOCKET_PROTOCOL_ERROR_CLOSE_STATUS          = 1002,
-  WEB_SOCKET_INVALID_DATA_TYPE_CLOSE_STATUS       = 1003,
-  WEB_SOCKET_EMPTY_CLOSE_STATUS                   = 1005,
-  WEB_SOCKET_ABORTED_CLOSE_STATUS                 = 1006,
-  WEB_SOCKET_INVALID_PAYLOAD_CLOSE_STATUS         = 1007,
-  WEB_SOCKET_POLICY_VIOLATION_CLOSE_STATUS        = 1008,
-  WEB_SOCKET_MESSAGE_TOO_BIG_CLOSE_STATUS         = 1009,
-  WEB_SOCKET_UNSUPPORTED_EXTENSIONS_CLOSE_STATUS  = 1010,
-  WEB_SOCKET_SERVER_ERROR_CLOSE_STATUS            = 1011,
-  WEB_SOCKET_SECURE_HANDSHAKE_ERROR_CLOSE_STATUS  = 1015
+  WEB_SOCKET_SUCCESS_CLOSE_STATUS = 1000,
+  WEB_SOCKET_ENDPOINT_UNAVAILABLE_CLOSE_STATUS = 1001,
+  WEB_SOCKET_PROTOCOL_ERROR_CLOSE_STATUS = 1002,
+  WEB_SOCKET_INVALID_DATA_TYPE_CLOSE_STATUS = 1003,
+  WEB_SOCKET_EMPTY_CLOSE_STATUS = 1005,
+  WEB_SOCKET_ABORTED_CLOSE_STATUS = 1006,
+  WEB_SOCKET_INVALID_PAYLOAD_CLOSE_STATUS = 1007,
+  WEB_SOCKET_POLICY_VIOLATION_CLOSE_STATUS = 1008,
+  WEB_SOCKET_MESSAGE_TOO_BIG_CLOSE_STATUS = 1009,
+  WEB_SOCKET_UNSUPPORTED_EXTENSIONS_CLOSE_STATUS = 1010,
+  WEB_SOCKET_SERVER_ERROR_CLOSE_STATUS = 1011,
+  WEB_SOCKET_SECURE_HANDSHAKE_ERROR_CLOSE_STATUS = 1015
 }
 
 export interface ClientOptions {
@@ -43,7 +43,7 @@ const DEFAULT_PORT: number = 10692;
 const DEFAULT_PATH: string = 'stream';
 
 export class Client extends EventEmitter {
-  private options: ClientOptions
+  private options: ClientOptions;
   private url: URL;
   private ws: Websocket;
   private reconnectCount: number = 0;
@@ -60,11 +60,11 @@ export class Client extends EventEmitter {
     try {
       wsURL = new URL(DEFAULT_PATH, host);
     } catch {
-      wsURL = new URL(DEFAULT_PATH, `ws://${host}`)
+      wsURL = new URL(DEFAULT_PATH, `ws://${host}`);
     }
     wsURL.protocol = 'ws';
     //@ts-ignore
-    wsURL.port = wsURL.port ? wsURL.port : this.options.port.toString()
+    wsURL.port = wsURL.port ? wsURL.port : this.options.port.toString();
     this.url = wsURL;
 
     this.connect();
@@ -74,21 +74,22 @@ export class Client extends EventEmitter {
     let ws = new Websocket(this.url.href);
     this.ws = ws;
 
-    ws.on('error', (err) => {
+    ws.on('error', err => {
       return;
-    })
+    });
 
     ws.on('open', () => {
       this.emit('connect');
-    })
+    });
 
     ws.on('close', (code, reason) => {
       this.emit('close', code);
       if (code === websocketCloseStatus.WEB_SOCKET_SUCCESS_CLOSE_STATUS) return;
-      if (this.options.reconnect) this.reconnect(this.options.reconnectInterval);
-    })
+      if (this.options.reconnect)
+        this.reconnect(this.options.reconnectInterval);
+    });
 
-    ws.on('message', (msg) => {
+    ws.on('message', msg => {
       this.onMessage(JSON.parse(msg.toString()));
     });
   }
@@ -106,8 +107,8 @@ export class Client extends EventEmitter {
     const reconnect = () => {
       this.emit('reconnect');
       this.connect();
-      this.reconnectCount++
-    }
+      this.reconnectCount++;
+    };
 
     if (timeout) {
       setTimeout(reconnect, timeout);
@@ -147,7 +148,7 @@ export class Client extends EventEmitter {
   }
 }
 
-export function connect (host: string, options?: ClientOptions): Client {
+export function connect(host: string, options?: ClientOptions): Client {
   const client = new Client(host, options);
   return client;
 }
