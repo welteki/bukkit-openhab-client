@@ -1,12 +1,6 @@
 # Editor
 .vscode
 
-# General
-.DS_Store
-
-# Dependency directories
-node_modules/
-
 # Files
 index.ts
 tsconfig.json
