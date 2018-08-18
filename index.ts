@@ -70,6 +70,10 @@ export interface PlayerGameModeCommand extends PlayerCommand {
   gameMode: GameMode;
 }
 
+export interface PlayerLocationCommand extends PlayerCommand {
+  location: string;
+}
+
 export interface SignStateCommand extends SignCommand {
   state: boolean;
 }
@@ -79,9 +83,10 @@ type CommandArgs =
   | PlayerWalkSpeedCommand
   | PlayerLevelCommand
   | PlayerGameModeCommand
+  | PlayerLocationCommand
   | SignStateCommand;
 
-type GameMode = 'CREATIVE' | 'SURVIVAL' | 'ADVENTURE' | 'SPECTATOR';
+export type GameMode = 'CREATIVE' | 'SURVIVAL' | 'ADVENTURE' | 'SPECTATOR';
 
 type BukkitPlayerCommand = Command & PlayerCommand;
 type BukkitSignCommand = Command & SignCommand;
@@ -263,6 +268,18 @@ export class Client extends EventEmitter {
           this.emit('error', invalidArgsError);
         }
         break;
+      case CommandType.PLAYER_LOCATION:
+        if (isPlayerLocationCommand(commandArgs)) {
+          const { playerName, location } = commandArgs;
+          this.sendCommand(MessageType.PLAYER_COMMANDS_MESSAGE, {
+            type: command,
+            playerName,
+            value: location
+          });
+        } else {
+          this.emit('error', invalidArgsError);
+        }
+        break;
       case CommandType.SIGN_STATE:
         if (isSignStateCommand(commandArgs)) {
           const { signName, state } = commandArgs;
@@ -286,7 +303,7 @@ export class Client extends EventEmitter {
       | MessageType.SIGN_COMMANDS_MESSAGE,
     message: BukkitPlayerCommand | BukkitSignCommand
   ) {
-    this.ws.send(JSON.stringify({ message, messageType }));
+    this.ws.send(JSON.stringify({ messageType, message }));
   }
 }
 
@@ -340,6 +357,15 @@ function isPlayerGameModeCommand(
   return (
     isPlayerCommand(command) &&
     (<PlayerGameModeCommand>command).gameMode !== undefined
+  );
+}
+
+function isPlayerLocationCommand(
+  command: CommandArgs
+): command is PlayerLocationCommand {
+  return (
+    isPlayerCommand(command) &&
+    (<PlayerLocationCommand>command).location !== undefined
   );
 }
 
