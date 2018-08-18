@@ -10,6 +10,15 @@ enum MessageType {
   SIGN_COMMANDS_MESSAGE = 5
 }
 
+export enum CommandType {
+  PLAYER_HEALTH = 'PLAYER_HEALTH',
+  PLAYER_WALKSPEED = 'PLAYER_WALK_SPEED',
+  PLAYER_LEVEL = 'PLAYER_LEVEL',
+  PLAYER_GAMEMODE = 'PLAYER_GAME_MODE',
+  PLAYER_LOCATION = 'PLAYER_LOCATION',
+  SIGN_STATE = 'COMMAND_SIGN_ACTIVE'
+}
+
 enum websocketState {
   CONNECTING,
   OPEN,
@@ -31,6 +40,60 @@ enum websocketCloseStatus {
   WEB_SOCKET_SERVER_ERROR_CLOSE_STATUS = 1011,
   WEB_SOCKET_SECURE_HANDSHAKE_ERROR_CLOSE_STATUS = 1015
 }
+
+interface Command {
+  type: CommandType;
+  value: any;
+}
+
+interface PlayerCommand {
+  playerName: string;
+}
+
+interface SignCommand {
+  signName: string;
+}
+
+export interface PlayerHealthCommand extends PlayerCommand {
+  health: number;
+}
+
+export interface PlayerWalkSpeedCommand extends PlayerCommand {
+  walkSpeed: number;
+}
+
+export interface PlayerLevelCommand extends PlayerCommand {
+  level: number;
+}
+
+export interface PlayerGameModeCommand extends PlayerCommand {
+  gameMode: GameMode;
+}
+
+export interface SignStateCommand extends SignCommand {
+  state: boolean;
+}
+
+type CommandArgs =
+  | PlayerHealthCommand
+  | PlayerWalkSpeedCommand
+  | PlayerLevelCommand
+  | PlayerGameModeCommand
+  | SignStateCommand;
+
+type GameMode = 'CREATIVE' | 'SURVIVAL' | 'ADVENTURE' | 'SPECTATOR';
+
+type BukkitPlayerCommand = Command & PlayerCommand;
+type BukkitSignCommand = Command & SignCommand;
+
+const commandType = new Map<CommandType, string>([
+  [CommandType.PLAYER_HEALTH, 'PLAYER_HEALTH'],
+  [CommandType.PLAYER_WALKSPEED, 'PLAYER_WALKSPEED'],
+  [CommandType.PLAYER_LEVEL, 'PLAYER_LEVEL'],
+  [CommandType.PLAYER_GAMEMODE, 'PLAYER_GAMEMODE'],
+  [CommandType.PLAYER_LOCATION, 'PLAYER_LOCATION'],
+  [CommandType.SIGN_STATE, 'SIGN_STATE']
+]);
 
 export interface ClientOptions {
   port?: number;
@@ -146,9 +209,142 @@ export class Client extends EventEmitter {
   private onSignMessage(message): void {
     this.emit('sign', message);
   }
+
+  send(command: CommandType, commandArgs: CommandArgs): void {
+    const invalidArgsError = `invalid arguments for commandType: ${commandType.get(
+      command
+    )}`;
+    switch (command) {
+      case CommandType.PLAYER_HEALTH:
+        if (isPlayerHealthCommand(commandArgs)) {
+          const { playerName, health } = commandArgs;
+          this.sendCommand(MessageType.PLAYER_COMMANDS_MESSAGE, {
+            type: command,
+            playerName,
+            value: health
+          });
+        } else {
+          this.emit('error', invalidArgsError);
+        }
+        break;
+      case CommandType.PLAYER_WALKSPEED:
+        if (isPlayerWalkSpeedCommand(commandArgs)) {
+          const { playerName, walkSpeed } = commandArgs;
+          this.sendCommand(MessageType.PLAYER_COMMANDS_MESSAGE, {
+            type: command,
+            playerName,
+            value: walkSpeed
+          });
+        } else {
+          this.emit('error', invalidArgsError);
+        }
+        break;
+      case CommandType.PLAYER_LEVEL:
+        if (isPlayerLevelCommand(commandArgs)) {
+          const { playerName, level } = commandArgs;
+          this.sendCommand(MessageType.PLAYER_COMMANDS_MESSAGE, {
+            type: command,
+            playerName,
+            value: level
+          });
+        } else {
+          this.emit('error', invalidArgsError);
+        }
+        break;
+      case CommandType.PLAYER_GAMEMODE:
+        if (isPlayerGameModeCommand(commandArgs)) {
+          const { playerName, gameMode } = commandArgs;
+          this.sendCommand(MessageType.PLAYER_COMMANDS_MESSAGE, {
+            type: command,
+            playerName,
+            value: gameMode
+          });
+        } else {
+          this.emit('error', invalidArgsError);
+        }
+        break;
+      case CommandType.SIGN_STATE:
+        if (isSignStateCommand(commandArgs)) {
+          const { signName, state } = commandArgs;
+          this.sendCommand(MessageType.SIGN_COMMANDS_MESSAGE, {
+            type: command,
+            signName,
+            value: state
+          });
+        } else {
+          this.emit('error', invalidArgsError);
+        }
+        break;
+      default:
+        this.emit('error', `unknown command type: ${command}`);
+    }
+  }
+
+  private sendCommand(
+    messageType:
+      | MessageType.PLAYER_COMMANDS_MESSAGE
+      | MessageType.SIGN_COMMANDS_MESSAGE,
+    message: BukkitPlayerCommand | BukkitSignCommand
+  ) {
+    this.ws.send(JSON.stringify({ message, messageType }));
+  }
 }
 
 export function connect(host: string, options?: ClientOptions): Client {
   const client = new Client(host, options);
   return client;
+}
+
+function isPlayerCommand(
+  command: CommandArgs | SignCommand | PlayerCommand
+): command is PlayerCommand {
+  return (<PlayerCommand>command).playerName !== undefined;
+}
+
+function isSignCommand(
+  command: CommandArgs | SignCommand | PlayerCommand
+): command is SignCommand {
+  return (<SignCommand>command).signName !== undefined;
+}
+
+function isPlayerHealthCommand(
+  command: CommandArgs
+): command is PlayerHealthCommand {
+  return (
+    isPlayerCommand(command) &&
+    (<PlayerHealthCommand>command).health !== undefined
+  );
+}
+
+function isPlayerWalkSpeedCommand(
+  command: CommandArgs
+): command is PlayerWalkSpeedCommand {
+  return (
+    isPlayerCommand(command) &&
+    (<PlayerWalkSpeedCommand>command).walkSpeed !== undefined
+  );
+}
+
+function isPlayerLevelCommand(
+  command: CommandArgs
+): command is PlayerLevelCommand {
+  return (
+    isPlayerCommand(command) &&
+    (<PlayerLevelCommand>command).level !== undefined
+  );
+}
+
+function isPlayerGameModeCommand(
+  command: CommandArgs
+): command is PlayerGameModeCommand {
+  return (
+    isPlayerCommand(command) &&
+    (<PlayerGameModeCommand>command).gameMode !== undefined
+  );
+}
+
+function isSignStateCommand(command: CommandArgs): command is SignStateCommand {
+  return (
+    isSignCommand(command) && (<SignStateCommand>command).state !== undefined
+  );
 }
