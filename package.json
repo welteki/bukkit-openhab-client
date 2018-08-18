@@ -8,8 +8,23 @@
     "prepublish": "npm run clean && npm run build",
     "build": "tsc",
     "watch": "tsc -w",
+    "format": "prettier --write \"**/*.{ts,md}\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "rm -rf dist"
+  },
+  "prettier": {
+    "singleQuote": true
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,md}": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "keywords": [
     "minecraft",
@@ -31,6 +46,9 @@
   },
   "devDependencies": {
     "@types/ws": "^5.1.2",
+    "husky": "^1.0.0-rc.13",
+    "lint-staged": "^7.2.2",
+    "prettier": "^1.14.2",
     "typescript": "^2.9.1"
   }
 }
