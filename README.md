@@ -10,6 +10,8 @@ npm install bukkit-openhab-client
 
 ## Example
 
+### Receiving messages
+
 ```javascript
 const OH = require('bukkit-openhab-client');
 
@@ -25,6 +27,19 @@ client.on('message', function(msg) {
 
 client.on('player', function(msg) {
   console.log(msg);
+});
+```
+
+### Sending commands
+
+```javascript
+const { connect, CommandType } = require('bukkit-openhab-client');
+
+let client = connect('localhost');
+
+client.send(CommandType.PLAYER_HEALTH, {
+  playerName: welteki,
+  health: 18
 });
 ```
 
@@ -152,3 +167,43 @@ example server message:
 ### OH.Client#close()
 
 Close websocket connection to the server
+
+### OH.Client#send(commandType, commandArgs)
+
+Send a command to the server
+
+**Command type**: `CommandType.PLAYER_HEALTH`
+
+- `commandArgs`
+  - `playerName` name of the player to execute the command on
+  - `health` number indicating the desired health level
+
+**Command type**: `CommandType.PLAYER_WALKSPEED`
+
+- `commandArgs`
+  - `playerName` name of the player to execute the command on
+  - `walkspeed` number indicating the desired walkspeed
+
+**Command type**: `CommandType.PLAYER_LEVEL`
+
+- `commandArgs`
+  - `playerName` name of the player to execute the command on
+  - `level`: number indicating the desired level
+
+**Command type**: `CommandType.PLAYER_GAMEMODE`
+
+- `commandArgs`
+  - `playerName` name of the player to execute the command on
+  - `gameMode` the desired game mode: CREATIVE, SURVIVAL, ADVENTURE, SPECTATOR
+
+**Command type**: `CommandType.PLAYER_LOCATION`
+
+- `commandArgs`
+  - `playerName` name of the player to execute the command on
+  - `location` location string
+
+**Command type**: `CommandType.SIGN_STATE`
+
+- `commandArgs`
+  - `signName` name of the sign
+  - `state` boolean indicating the desired state
